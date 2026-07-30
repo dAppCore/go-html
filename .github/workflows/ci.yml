@@ -1,6 +1,9 @@
-# CI for go-html. The Go module lives at go/ (this is a polyglot repo), so the
-# shared dAppCore/build/actions/build/core action — which builds from the repo
-# root — can't be used here; the steps are inlined against go/ instead.
+# CI for go-html. The Go module lives at go/ (this is a polyglot repo). The
+# shared dAppCore/build/actions/build/core action can now find a module in
+# go/ (it no longer requires building from the repo root), but the steps
+# stay inlined here because this job also needs to install the Linux GUI
+# dev packages (GTK4/WebKitGTK) before build/vet/test — the shared action
+# doesn't do that.
 # The repo commits a go.work for local dev, so CI sets GOWORK=off to resolve
 # from released go.mod tags.
 name: CI
@@ -23,6 +26,11 @@ jobs:
         with:
           go-version: "1.26"
           cache-dependency-path: go/go.sum
+
+      - name: "install Linux GUI dependencies (wails3: GTK4 + WebKitGTK)"
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgtk-4-dev libwebkitgtk-6.0-dev
 
       - name: build
         working-directory: go
