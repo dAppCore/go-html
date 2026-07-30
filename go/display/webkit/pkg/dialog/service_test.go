@@ -49,9 +49,11 @@ func newTestService(t *core.T) (*mockPlatform, *core.Core) {
 		openDirPath:   "/tmp/dir",
 		messageButton: "OK",
 	}
+	// Unlocked: callers register a "gui.webview.eval" stub after startup to
+	// stand in for the webview, and since core v0.12.0 ServiceStartup seals
+	// the action registry, which refuses that write without reporting it.
 	c := core.New(
 		core.WithService(Register(mock)),
-		core.WithServiceLock(),
 	)
 	core.RequireTrue(t, c.ServiceStartup(context.Background(), nil).OK)
 	return mock, c

@@ -53,8 +53,13 @@ func TestWindowHelpersBehaviour_Guards_Bad(t *core.T) {
 // descriptor, or nil when the gui service is absent / the name is unknown.
 func TestWindowHelpersBehaviour_lookupWindow_Good(t *core.T) {
 	chat := &window.Window{Name: "chat", Title: "Chat"}
+	// WithName("gui", …) is the documented registration, and the helpers look
+	// the service up under that name. WithService instead derives the name
+	// from the instance's package path, which has been "webkit" since the
+	// package was renamed — so the service registered fine and every lookup
+	// for "gui" missed it.
 	c := core.New(
-		core.WithService(NewService(GuiConfig{
+		core.WithName("gui", NewService(GuiConfig{
 			WindowRegistry: []*window.Window{chat, nil},
 		})),
 		core.WithServiceLock(),
@@ -71,7 +76,7 @@ func TestWindowHelpersBehaviour_lookupWindow_Good(t *core.T) {
 // QueryWindowByName query (gui service present but window sub-service absent).
 func TestWindowHelpersBehaviour_WindowExists_Bad(t *core.T) {
 	c := core.New(
-		core.WithService(NewService(GuiConfig{})),
+		core.WithName("gui", NewService(GuiConfig{})),
 		core.WithServiceLock(),
 	)
 	core.AssertFalse(t, WindowExists(c, "chat"))

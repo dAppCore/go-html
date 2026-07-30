@@ -19,6 +19,19 @@ import (
 
 // --- Test helpers ---
 
+// No WithServiceLock here, deliberately. Since core v0.12.0, ServiceStartup
+// ends by sealing the capability surface — the enclave contract — and that
+// locks the action registry along with it. These two builders exist to be
+// extended: the caller starts them up and then registers stub actions
+// (c.Action("dialog.open_file", …)) to stand in for a platform this test
+// binary has no way to drive. Against a sealed registry those registrations
+// are refused, and because Core.Action discards the Set result they are
+// refused silently — the test then fails much later with "action not
+// registered", naming the symptom rather than the cause.
+//
+// A fixture is not an enclave. Nothing here is exported as a package-var
+// toolkit, which is what the lock exists to make safe. The tests that mean to
+// exercise locking construct their own locked Core and still do.
 func newTestCore(t *core.T, serviceFactories ...func(*core.Core) core.Result) *core.Core {
 	t.Helper()
 	configPath := core.JoinPath(t.TempDir(), "config.yaml")
@@ -26,7 +39,6 @@ func newTestCore(t *core.T, serviceFactories ...func(*core.Core) core.Result) *c
 	for _, factory := range serviceFactories {
 		options = append(options, core.WithService(factory))
 	}
-	options = append(options, core.WithServiceLock())
 	c := core.New(options...)
 	core.RequireTrue(t, c.ServiceStartup(context.Background(), nil).OK)
 	return c
@@ -51,7 +63,6 @@ func newServiceWithMockApp(t *core.T, serviceFactories ...func(*core.Core) core.
 	for _, factory := range serviceFactories {
 		options = append(options, core.WithService(factory))
 	}
-	options = append(options, core.WithServiceLock())
 	c := core.New(options...)
 	core.RequireTrue(t, c.ServiceStartup(context.Background(), nil).OK)
 	svc := core.MustServiceFor[*Service](c, "display")
@@ -89,6 +100,12 @@ func newTestDisplayService(t *core.T) (*Service, *core.Core) {
 }
 
 // newTestConclave creates a full 4-service conclave for integration testing.
+//
+// Unlocked for the same reason as newTestCore above, with one extra wrinkle:
+// the callers here override an action the real service already registered, to
+// make it fail on demand. A locked registry refuses even that — Set rejects
+// every write once locked, not just new keys — so the override vanished and
+// the genuine mock-platform action answered instead.
 func newTestConclave(t *core.T) *core.Core {
 	t.Helper()
 	t.Setenv("HOME", t.TempDir())
@@ -97,7 +114,6 @@ func newTestConclave(t *core.T) *core.Core {
 		core.WithService(window.Register(window.NewMockPlatform())),
 		core.WithService(systray.Register(systray.NewMockPlatform())),
 		core.WithService(menu.Register(menu.NewMockPlatform())),
-		core.WithServiceLock(),
 	)
 	core.RequireTrue(t, c.ServiceStartup(context.Background(), nil).OK)
 	return c
