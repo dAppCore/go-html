@@ -5,8 +5,8 @@ package tui_test
 import (
 	"fmt"
 
-	ctml "dappco.re/go/render/engine/ctml"
 	tui "dappco.re/go/render/display/tui"
+	ctml "dappco.re/go/render/engine/ctml"
 )
 
 // ExampleNewApp builds a manager around a .ctml document -- the shape a consumer

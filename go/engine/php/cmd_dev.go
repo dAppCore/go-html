@@ -5,6 +5,7 @@ import (
 	"context"
 	"os"
 	"os/signal"
+	"slices"
 	"syscall"
 	"time"
 
@@ -50,7 +51,7 @@ func runPHPDev(opts phpDevOptions) error { // Result boundary
 		return core.E("php", phpT("cmd.php.error.not_laravel"), nil)
 	}
 
-	cli.Print(cliLabelValueBlankFormat, dimStyle.Render(phpT(cmdPHPLabelKey)), phpT("cmd.php.dev.starting", map[string]interface{}{"AppName": laravelDisplayName(cwd)}))
+	cli.Print(cliLabelValueBlankFormat, dimStyle.Render(phpT(cmdPHPLabelKey)), phpT("cmd.php.dev.starting", map[string]any{"AppName": laravelDisplayName(cwd)}))
 
 	// Detect services
 	services := DetectServices(cwd)
@@ -80,7 +81,7 @@ func runPHPDev(opts phpDevOptions) error { // Result boundary
 
 	// Stop services
 	if err := server.Stop(); err != nil {
-		cli.Print(cliLabelValueFormat, errorStyle.Render(phpLabel("error")), phpT("cmd.php.dev.stop_error", map[string]interface{}{"Error": err}))
+		cli.Print(cliLabelValueFormat, errorStyle.Render(phpLabel("error")), phpT("cmd.php.dev.stop_error", map[string]any{"Error": err}))
 	}
 
 	cli.Print(cliLabelValueFormat, successStyle.Render(phpLabel("done")), phpT("cmd.php.dev.all_stopped"))
@@ -342,7 +343,7 @@ func runPHPSSL(domain string) error { // Result boundary
 		return core.E("php", phpT("cmd.php.error.mkcert_not_installed"), nil)
 	}
 
-	cli.Print(cliLabelValueFormat, dimStyle.Render("SSL:"), phpT("cmd.php.ssl.setting_up", map[string]interface{}{"Domain": domain}))
+	cli.Print(cliLabelValueFormat, dimStyle.Render("SSL:"), phpT("cmd.php.ssl.setting_up", map[string]any{"Domain": domain}))
 
 	// Check if certs already exist
 	if CertsExist(domain, SSLOptions{}) {
@@ -376,14 +377,14 @@ func printServiceStatuses(statuses []ServiceStatus) {
 		var statusText string
 
 		if s.Error != nil {
-			statusText = phpStatusError.Render(phpT("cmd.php.status.error", map[string]interface{}{"Error": s.Error}))
+			statusText = phpStatusError.Render(phpT("cmd.php.status.error", map[string]any{"Error": s.Error}))
 		} else if s.Running {
 			statusText = phpStatusRunning.Render(phpT("cmd.php.status.running"))
 			if s.Port > 0 {
-				statusText += dimStyle.Render(cli.Sprintf(" (%s)", phpT("cmd.php.status.port", map[string]interface{}{"Port": s.Port})))
+				statusText += dimStyle.Render(cli.Sprintf(" (%s)", phpT("cmd.php.status.port", map[string]any{"Port": s.Port})))
 			}
 			if s.PID > 0 {
-				statusText += dimStyle.Render(cli.Sprintf(" [%s]", phpT("cmd.php.status.pid", map[string]interface{}{"PID": s.PID})))
+				statusText += dimStyle.Render(cli.Sprintf(" [%s]", phpT("cmd.php.status.pid", map[string]any{"PID": s.PID})))
 			}
 		} else {
 			statusText = phpStatusStopped.Render(phpT("cmd.php.status.stopped"))
@@ -451,10 +452,5 @@ func getServiceStyle(name string) *cli.AnsiStyle {
 }
 
 func containsService(services []DetectedService, target DetectedService) bool {
-	for _, s := range services {
-		if s == target {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(services, target)
 }

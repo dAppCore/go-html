@@ -71,7 +71,7 @@ func DetectModeWithEnvironment(environment ModeEnvironment) AppMode {
 }
 
 func modeArgValue(args []string) (string, bool) {
-	for i := 0; i < len(args); i++ {
+	for i := range args {
 		arg := core.Trim(args[i])
 		if arg == "--mode" || arg == "-mode" {
 			if i+1 < len(args) {

@@ -3,6 +3,7 @@ package contextmenu
 
 import (
 	"context"
+	"maps"
 	"sync"
 
 	core "dappco.re/go"
@@ -112,9 +113,7 @@ func (s *Service) queryList() map[string]ContextMenuDef {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	result := make(map[string]ContextMenuDef, len(s.registeredMenus))
-	for k, v := range s.registeredMenus {
-		result[k] = v
-	}
+	maps.Copy(result, s.registeredMenus)
 	return result
 }
 

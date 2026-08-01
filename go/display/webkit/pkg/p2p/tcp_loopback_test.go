@@ -20,8 +20,7 @@ func TestTCPDriverLoopback_AcceptRead_Good(t *core.T) {
 	defer receiver.Close()
 
 	received := make(chan Envelope, 1)
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+	ctx := t.Context()
 
 	core.RequireNoError(t, receiver.Subscribe(ctx, "updates", func(e Envelope) {
 		received <- e
@@ -57,8 +56,7 @@ func TestTCPDriverLoopback_AcceptRead_Bad(t *core.T) {
 	defer receiver.Close()
 
 	received := make(chan Envelope, 1)
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+	ctx := t.Context()
 	core.RequireNoError(t, receiver.Subscribe(ctx, "topic", func(e Envelope) {
 		received <- e
 	}))

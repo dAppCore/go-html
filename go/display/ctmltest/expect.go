@@ -11,10 +11,10 @@ import (
 	"strings"
 	"testing"
 
-	core "dappco.re/go"
-	html "dappco.re/go/render/engine/html"
-	coreio "dappco.re/go/io"
 	"charm.land/lipgloss/v2"
+	core "dappco.re/go"
+	coreio "dappco.re/go/io"
+	html "dappco.re/go/render/engine/html"
 	"github.com/charmbracelet/x/ansi"
 )
 
@@ -136,7 +136,7 @@ func matchWidth(frame string, want int) (ok bool, detail string) {
 // figure.
 func frameWidth(frame string) int {
 	width := 0
-	for _, line := range strings.Split(frame, "\n") {
+	for line := range strings.SplitSeq(frame, "\n") {
 		if w := lipgloss.Width(line); w > width {
 			width = w
 		}

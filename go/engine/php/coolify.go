@@ -55,7 +55,7 @@ type CoolifyDeployment struct {
 	CommitMsg   string    `json:"commit_message,omitempty"`
 	Branch      string    `json:"branch,omitempty"`
 	CreatedAt   time.Time `json:"created_at"`
-	FinishedAt  time.Time `json:"finished_at,omitempty"`
+	FinishedAt  time.Time `json:"finished_at"`
 	Log         string    `json:"log,omitempty"`
 	DeployedURL string    `json:"deployed_url,omitempty"`
 }
@@ -182,7 +182,7 @@ func validateCoolifyConfig(config *CoolifyConfig) (*CoolifyConfig, error) { // R
 func (c *CoolifyClient) TriggerDeploy(ctx context.Context, appID string, force bool) (*CoolifyDeployment, error) { // Result boundary
 	endpoint := cli.Sprintf("%s/api/v1/applications/%s/deploy", c.BaseURL, appID)
 
-	payload := map[string]interface{}{}
+	payload := map[string]any{}
 	if force {
 		payload["force"] = true
 	}
@@ -290,7 +290,7 @@ func (c *CoolifyClient) ListDeployments(ctx context.Context, appID string, limit
 func (c *CoolifyClient) Rollback(ctx context.Context, appID, deploymentID string) (*CoolifyDeployment, error) { // Result boundary
 	endpoint := cli.Sprintf("%s/api/v1/applications/%s/rollback", c.BaseURL, appID)
 
-	payload := map[string]interface{}{
+	payload := map[string]any{
 		"deployment_id": deploymentID,
 	}
 

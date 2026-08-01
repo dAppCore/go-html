@@ -10,9 +10,9 @@ import (
 	"github.com/charmbracelet/x/ansi"
 	teatest "github.com/charmbracelet/x/exp/teatest/v2"
 
+	tui "dappco.re/go/render/display/tui"
 	ctml "dappco.re/go/render/engine/ctml"
 	html "dappco.re/go/render/engine/html"
-	tui "dappco.re/go/render/display/tui"
 )
 
 // parse compiles a .ctml source to a node, failing the test on a parse error.

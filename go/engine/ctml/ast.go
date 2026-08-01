@@ -351,7 +351,7 @@ func lookupPath(item map[string]any, path string) (any, bool) {
 		return nil, false
 	}
 	var current any = item
-	for _, step := range strings.Split(path, ".") {
+	for step := range strings.SplitSeq(path, ".") {
 		m, ok := current.(map[string]any)
 		if !ok {
 			return nil, false
@@ -427,7 +427,7 @@ func truthy(v any) bool {
 		return rv.Uint() != 0
 	case reflect.Float32, reflect.Float64:
 		return rv.Float() != 0
-	case reflect.Ptr, reflect.Interface:
+	case reflect.Pointer, reflect.Interface:
 		return !rv.IsNil()
 	default:
 		return true

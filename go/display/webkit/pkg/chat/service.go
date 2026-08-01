@@ -97,7 +97,7 @@ type thinkingInput struct {
 	ConversationID string    `json:"conversation_id,omitempty"`
 	MessageID      string    `json:"message_id,omitempty"`
 	Content        string    `json:"content,omitempty"`
-	StartedAt      time.Time `json:"started_at,omitempty"`
+	StartedAt      time.Time `json:"started_at"`
 	DurationMS     int64     `json:"duration_ms,omitempty"`
 }
 
@@ -649,10 +649,7 @@ func (s *Service) StopThinking(input thinkingInput) (ThinkingState, resultFailur
 	state.EndedAt = s.now()
 	state.DurationMS = input.DurationMS
 	if state.DurationMS == 0 {
-		state.DurationMS = state.EndedAt.Sub(state.StartedAt).Milliseconds()
-		if state.DurationMS < 0 {
-			state.DurationMS = 0
-		}
+		state.DurationMS = max(state.EndedAt.Sub(state.StartedAt).Milliseconds(), 0)
 	}
 
 	s.emit(ActionThinkingEnded{
@@ -1072,7 +1069,7 @@ func (s *Service) send(ctx context.Context, input sendInput) (string, resultFail
 	s.emit(ActionMessageAdded{ConversationID: conv.ID, Message: userMessage})
 	s.emit(ActionConversationUpdated{Conversation: conv})
 
-	for toolRound := 0; toolRound < maxToolRounds; toolRound++ {
+	for range maxToolRounds {
 		effectiveSettings := s.mergedSettings(settings, conv.Settings)
 		conv.Model = s.resolveModel(conv.Model, effectiveSettings.DefaultModel)
 		if err := s.validateAttachmentsForModel(conv.Model, attachmentsForConversationTurn(conv.Messages)); err != nil {

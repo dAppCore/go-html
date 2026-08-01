@@ -241,7 +241,7 @@ func addPHPShellCommand(c *core.Core, prefix string) {
 
 		ctx := context.Background()
 
-		cli.Print(cliLabelValueFormat, dimStyle.Render(phpT(cmdPHPLabelKey)), phpT("cmd.php.shell.opening", map[string]interface{}{"Container": args[0]}))
+		cli.Print(cliLabelValueFormat, dimStyle.Render(phpT(cmdPHPLabelKey)), phpT("cmd.php.shell.opening", map[string]any{"Container": args[0]}))
 
 		if err := Shell(ctx, args[0]); err != nil {
 			return core.E("php", phpT("i18n.fail.open", "shell"), err)

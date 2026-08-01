@@ -23,7 +23,7 @@ func repeat(s string, n int) string {
 		return ""
 	}
 	out := make([]byte, 0, len(s)*n)
-	for i := 0; i < n; i++ {
+	for range n {
 		out = append(out, s...)
 	}
 	return string(out)

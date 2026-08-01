@@ -3,6 +3,7 @@ package contextmenu
 
 import (
 	"context"
+	"maps"
 	"sync"
 
 	core "dappco.re/go"
@@ -62,9 +63,7 @@ func (m *mockPlatform) GetAll() map[string]ContextMenuDef {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	out := make(map[string]ContextMenuDef, len(m.menus))
-	for k, v := range m.menus {
-		out[k] = v
-	}
+	maps.Copy(out, m.menus)
 	return out
 }
 

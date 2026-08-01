@@ -271,10 +271,8 @@ func TestManifest_LoadManifestForOrigin_Concurrent(t *core.T) {
 
 	var wg sync.WaitGroup
 	errs := make(chan resultFailure, 16)
-	for i := 0; i < 16; i++ {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
+	for range 16 {
+		wg.Go(func() {
 			loaded, loadErr := svc.loadManifestForOrigin(core.PathJoin(root, "index.html"))
 			if loadErr != nil {
 				errs <- loadErr
@@ -283,7 +281,7 @@ func TestManifest_LoadManifestForOrigin_Concurrent(t *core.T) {
 			if loaded == nil || loaded.Manifest.Name != "demo" {
 				errs <- core.AnError
 			}
-		}()
+		})
 	}
 	wg.Wait()
 	close(errs)

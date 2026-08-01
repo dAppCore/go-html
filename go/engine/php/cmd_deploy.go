@@ -45,7 +45,7 @@ func addPHPDeployCommand(c *core.Core, prefix string) {
 			env = EnvStaging
 		}
 
-		cli.Print(cliLabelValueBlankFormat, dimStyle.Render(phpT(cmdPHPDeployLabelKey)), phpT("cmd.php.deploy.deploying", map[string]interface{}{"Environment": env}))
+		cli.Print(cliLabelValueBlankFormat, dimStyle.Render(phpT(cmdPHPDeployLabelKey)), phpT("cmd.php.deploy.deploying", map[string]any{"Environment": env}))
 
 		ctx := context.Background()
 
@@ -67,7 +67,7 @@ func addPHPDeployCommand(c *core.Core, prefix string) {
 			if IsDeploymentSuccessful(status.Status) {
 				cli.Print(cliSectionLabelValueFormat, successStyle.Render(phpLabel("done")), phpT("common.success.completed", map[string]any{"Action": "Deployment completed"}))
 			} else {
-				cli.Print(cliSectionLabelValueFormat, errorStyle.Render(phpLabel("warning")), phpT("cmd.php.deploy.warning_status", map[string]interface{}{"Status": status.Status}))
+				cli.Print(cliSectionLabelValueFormat, errorStyle.Render(phpLabel("warning")), phpT("cmd.php.deploy.warning_status", map[string]any{"Status": status.Status}))
 			}
 		} else {
 			cli.Print(cliSectionLabelValueFormat, successStyle.Render(phpLabel("done")), phpT("cmd.php.deploy.triggered"))
@@ -130,7 +130,7 @@ func addPHPDeployRollbackCommand(c *core.Core, prefix string) {
 			env = EnvStaging
 		}
 
-		cli.Print(cliLabelValueBlankFormat, dimStyle.Render(phpT(cmdPHPDeployLabelKey)), phpT("cmd.php.deploy_rollback.rolling_back", map[string]interface{}{"Environment": env}))
+		cli.Print(cliLabelValueBlankFormat, dimStyle.Render(phpT(cmdPHPDeployLabelKey)), phpT("cmd.php.deploy_rollback.rolling_back", map[string]any{"Environment": env}))
 
 		ctx := context.Background()
 
@@ -152,7 +152,7 @@ func addPHPDeployRollbackCommand(c *core.Core, prefix string) {
 			if IsDeploymentSuccessful(status.Status) {
 				cli.Print(cliSectionLabelValueFormat, successStyle.Render(phpLabel("done")), phpT("common.success.completed", map[string]any{"Action": "Rollback completed"}))
 			} else {
-				cli.Print(cliSectionLabelValueFormat, errorStyle.Render(phpLabel("warning")), phpT("cmd.php.deploy_rollback.warning_status", map[string]interface{}{"Status": status.Status}))
+				cli.Print(cliSectionLabelValueFormat, errorStyle.Render(phpLabel("warning")), phpT("cmd.php.deploy_rollback.warning_status", map[string]any{"Status": status.Status}))
 			}
 		} else {
 			cli.Print(cliSectionLabelValueFormat, successStyle.Render(phpLabel("done")), phpT("cmd.php.deploy_rollback.triggered"))
@@ -183,7 +183,7 @@ func addPHPDeployListCommand(c *core.Core, prefix string) {
 			limit = 10
 		}
 
-		cli.Print(cliLabelValueBlankFormat, dimStyle.Render(phpT(cmdPHPDeployLabelKey)), phpT("cmd.php.deploy_list.recent", map[string]interface{}{"Environment": env}))
+		cli.Print(cliLabelValueBlankFormat, dimStyle.Render(phpT(cmdPHPDeployLabelKey)), phpT("cmd.php.deploy_list.recent", map[string]any{"Environment": env}))
 
 		ctx := context.Background()
 

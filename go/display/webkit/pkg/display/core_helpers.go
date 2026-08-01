@@ -284,7 +284,7 @@ func repeatString(value string, count int) string {
 		return ""
 	}
 	builder := core.NewBuilder()
-	for i := 0; i < count; i++ {
+	for range count {
 		builder.WriteString(value)
 	}
 	return builder.String()

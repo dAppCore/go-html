@@ -31,7 +31,9 @@ func render(t *testing.T, md string, opts ...markdown.Option) string {
 
 // ptr returns a pointer to v. ansi.StylePrimitive's fields are all pointers,
 // so a zero-value field reads as "unset" rather than as false/"".
-func ptr[T any](v T) *T { return &v }
+//
+//go:fix inline
+func ptr[T any](v T) *T { return new(v) }
 
 // TestStyleConfig proves StyleConfig, StyleBlock and StylePrimitive are
 // genuine aliases of the glamour/ansi structs, not shadow types: a composite
@@ -41,8 +43,8 @@ func TestStyleConfig(t *testing.T) {
 	cfg := markdown.StyleConfig{
 		H1: markdown.StyleBlock{
 			StylePrimitive: markdown.StylePrimitive{
-				Color: ptr("#D97757"),
-				Bold:  ptr(true),
+				Color: new("#D97757"),
+				Bold:  new(true),
 			},
 		},
 	}
@@ -64,8 +66,8 @@ func TestWithStyles(t *testing.T) {
 	cfg := markdown.StyleConfig{
 		H1: markdown.StyleBlock{
 			StylePrimitive: markdown.StylePrimitive{
-				Color: ptr("#D97757"),
-				Bold:  ptr(true),
+				Color: new("#D97757"),
+				Bold:  new(true),
 			},
 		},
 	}

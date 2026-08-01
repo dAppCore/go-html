@@ -2,6 +2,7 @@
 package window
 
 import (
+	"maps"
 	"sync"
 	"time"
 
@@ -137,9 +138,7 @@ func (lm *LayoutManager) save() resultFailure {
 	lm.mu.RLock()
 	filePath := lm.filePath()
 	layouts := make(map[string]Layout, len(lm.layouts))
-	for name, layout := range lm.layouts {
-		layouts[name] = layout
-	}
+	maps.Copy(layouts, lm.layouts)
 	result := core.JSONMarshal(layouts)
 	lm.mu.RUnlock()
 	if !result.OK {

@@ -34,10 +34,10 @@ type TIMState struct {
 	Image     string           `json:"image"`
 	Runtime   ContainerRuntime `json:"runtime"`
 	Status    string           `json:"status"`
-	StartedAt time.Time        `json:"started_at,omitempty"`
+	StartedAt time.Time        `json:"started_at"`
 	Command   []string         `json:"command,omitempty"`
 	DataDir   string           `json:"data_dir,omitempty"`
-	Resources TIMResources     `json:"resources,omitempty"`
+	Resources TIMResources     `json:"resources"`
 }
 
 type TIMManager struct {

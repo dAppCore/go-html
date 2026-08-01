@@ -2,6 +2,7 @@
 package window
 
 import (
+	"maps"
 	"sync"
 	"time"
 
@@ -136,9 +137,7 @@ func (sm *StateManager) save() resultFailure {
 	sm.mu.RLock()
 	filePath := sm.filePath()
 	states := make(map[string]WindowState, len(sm.states))
-	for name, state := range sm.states {
-		states[name] = state
-	}
+	maps.Copy(states, sm.states)
 	sm.mu.RUnlock()
 	result := core.JSONMarshal(states)
 	if !result.OK {

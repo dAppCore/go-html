@@ -5,7 +5,7 @@ func bytesRepeat(value []byte, count int) []byte {
 		return nil
 	}
 	out := make([]byte, 0, len(value)*count)
-	for i := 0; i < count; i++ {
+	for range count {
 		out = append(out, value...)
 	}
 	return out

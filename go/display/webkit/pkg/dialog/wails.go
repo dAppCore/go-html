@@ -122,7 +122,6 @@ func (wp *WailsPlatform) MessageDialog(opts MessageDialogOptions) (string, resul
 		return "", nil
 	}
 	for _, label := range opts.Buttons {
-		label := label
 		b := dlg.AddButton(label)
 		b.OnClick(func() { clicked <- label })
 	}

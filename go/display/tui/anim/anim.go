@@ -108,10 +108,7 @@ var _ tea.Model = Anim{}
 // On a truecolour terminal (size >= 3) the cycling characters are painted
 // with a pink-to-purple gradient ramp that cycles as the animation runs.
 func New(size uint, label string) Anim {
-	n := int(size)
-	if n > maxCyclingChars {
-		n = maxCyclingChars
-	}
+	n := min(int(size), maxCyclingChars)
 
 	gap := " "
 	if n == 0 {
@@ -261,7 +258,7 @@ func makeGradientRamp(length int) []style.Paint {
 		start, _ = colorful.Hex(startColour)
 		end, _   = colorful.Hex(endColour)
 	)
-	for i := 0; i < length; i++ {
+	for i := range length {
 		c[i] = start.BlendLuv(end, float64(i)/float64(length))
 	}
 	return c

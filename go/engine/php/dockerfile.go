@@ -1,6 +1,7 @@
 package php
 
 import (
+	"maps"
 	"sort"
 
 	core "dappco.re/go"
@@ -299,12 +300,8 @@ func detectPHPExtensions(composer ComposerJSON) []string {
 
 	// Check all require and require-dev dependencies
 	allDeps := make(map[string]string)
-	for pkg, ver := range composer.Require {
-		allDeps[pkg] = ver
-	}
-	for pkg, ver := range composer.RequireDev {
-		allDeps[pkg] = ver
-	}
+	maps.Copy(allDeps, composer.Require)
+	maps.Copy(allDeps, composer.RequireDev)
 
 	// Find required extensions
 	for pkg := range allDeps {

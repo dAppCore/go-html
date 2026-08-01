@@ -57,8 +57,8 @@ type ChatConversation struct {
 type ChatThinkingState struct {
 	Active     bool      `json:"active"`
 	Content    string    `json:"content"`
-	StartedAt  time.Time `json:"started_at,omitempty"`
-	EndedAt    time.Time `json:"ended_at,omitempty"`
+	StartedAt  time.Time `json:"started_at"`
+	EndedAt    time.Time `json:"ended_at"`
 	DurationMS int64     `json:"duration_ms,omitempty"`
 }
 
@@ -269,7 +269,7 @@ func (s *Subsystem) chatConversationsDelete(_ context.Context, _ *mcp.CallToolRe
 type ChatThinkingStartInput struct {
 	ConversationID string    `json:"conversation_id"`
 	MessageID      string    `json:"message_id,omitempty"`
-	StartedAt      time.Time `json:"started_at,omitempty"`
+	StartedAt      time.Time `json:"started_at"`
 }
 
 type ChatThinkingStartOutput struct {
@@ -298,7 +298,7 @@ func (s *Subsystem) chatThinkingStart(_ context.Context, _ *mcp.CallToolRequest,
 type ChatThinkingStopInput struct {
 	ConversationID string    `json:"conversation_id"`
 	MessageID      string    `json:"message_id,omitempty"`
-	StartedAt      time.Time `json:"started_at,omitempty"`
+	StartedAt      time.Time `json:"started_at"`
 	DurationMS     int64     `json:"duration_ms,omitempty"`
 }
 

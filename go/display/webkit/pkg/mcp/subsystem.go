@@ -230,7 +230,7 @@ func schemaForType(t reflect.Type) map[string]any {
 		return nil
 	}
 
-	if t == reflect.TypeOf(time.Time{}) {
+	if t == reflect.TypeFor[time.Time]() {
 		return map[string]any{
 			"type":   "string",
 			"format": "date-time",
@@ -241,8 +241,8 @@ func schemaForType(t reflect.Type) map[string]any {
 	case reflect.Struct:
 		properties := make(map[string]any)
 		required := make([]string, 0, t.NumField())
-		for i := range t.NumField() {
-			field := t.Field(i)
+		for field := range t.Fields() {
+			field := field
 			if !field.IsExported() {
 				continue
 			}

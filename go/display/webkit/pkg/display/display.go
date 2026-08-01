@@ -1839,7 +1839,9 @@ func (s *Service) buildMenu() {
 }
 
 // pointerTo returns a pointer to value.
-func pointerTo[T any](value T) *T { return &value }
+//
+//go:fix inline
+func pointerTo[T any](value T) *T { return new(value) }
 
 // --- Menu handler methods ---
 

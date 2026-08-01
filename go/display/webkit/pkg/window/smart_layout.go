@@ -391,10 +391,7 @@ func intersectsAny(candidate screen.Rect, occupied []screen.Rect) bool {
 func (s *Service) taskScreenFindSpace(task TaskScreenFindSpace) ScreenSpace {
 	scr := s.screenByID(task.ScreenID)
 	area := screenWorkArea(scr)
-	padding := task.Padding
-	if padding < 0 {
-		padding = 0
-	}
+	padding := max(task.Padding, 0)
 
 	reqWidth := task.Width
 	if reqWidth <= 0 {

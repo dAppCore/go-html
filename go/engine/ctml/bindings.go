@@ -12,12 +12,12 @@ package ctml
 // docs/ctml.md S:S8 explains why the source has to be supplied at parse
 // time rather than through Context at render time.
 //
-// Usage example: ctml.Bindings{
-//	Sequences: map[string][]map[string]any{
-//		"repos": {{"name": "go-html", "status": "green"}},
-//	},
-//	Values: map[string]any{"user": "ada", "count": 3},
-// }
+//	Usage example: ctml.Bindings{
+//		Sequences: map[string][]map[string]any{
+//			"repos": {{"name": "go-html", "status": "green"}},
+//		},
+//		Values: map[string]any{"user": "ada", "count": 3},
+//	}
 type Bindings struct {
 	Sequences map[string][]map[string]any
 	Values    map[string]any

@@ -2,6 +2,7 @@ package display
 
 import (
 	"io"
+	"maps"
 	"net"
 	"net/url"
 
@@ -252,9 +253,7 @@ func (s *Service) manifestWindowConfig(pageURL string) map[string]ManifestWindow
 		return nil
 	}
 	windows := make(map[string]ManifestWindow, len(loaded.Manifest.Windows))
-	for name, cfg := range loaded.Manifest.Windows {
-		windows[name] = cfg
-	}
+	maps.Copy(windows, loaded.Manifest.Windows)
 	return windows
 }
 

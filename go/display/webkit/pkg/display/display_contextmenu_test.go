@@ -1,6 +1,7 @@
 package display
 
 import (
+	"maps"
 	"sync"
 
 	core "dappco.re/go"
@@ -46,9 +47,7 @@ func (m *wsContextMenuPlatform) GetAll() map[string]contextmenu.ContextMenuDef {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	out := make(map[string]contextmenu.ContextMenuDef, len(m.menus))
-	for name, menu := range m.menus {
-		out[name] = menu
-	}
+	maps.Copy(out, m.menus)
 	return out
 }
 

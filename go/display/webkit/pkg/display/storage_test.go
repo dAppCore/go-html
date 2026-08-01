@@ -151,7 +151,7 @@ func TestStorageRegistry_Delete_Good(t *core.T) {
 
 func TestStorageRegistry_Set_RejectsQuotaOverflow(t *core.T) {
 	r := NewStorageRegistry()
-	for i := 0; i < maxStorageEntriesPerOrigin; i++ {
+	for i := range maxStorageEntriesPerOrigin {
 		core.RequireTrue(t, r.Set("core://settings", "localStorage", core.Sprintf("key-%d", i), "v"))
 	}
 	core.AssertFalse(t, r.Set("core://settings", "localStorage", "overflow", "v"))

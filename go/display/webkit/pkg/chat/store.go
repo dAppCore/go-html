@@ -1,6 +1,7 @@
 package chat
 
 import (
+	"maps"
 	"sync"
 
 	core "dappco.re/go"
@@ -76,9 +77,7 @@ func (s *chatStore) getAll(group string) (map[string]string, resultFailure) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	copy := make(map[string]string)
-	for key, value := range s.data[group] {
-		copy[key] = value
-	}
+	maps.Copy(copy, s.data[group])
 	return copy, nil
 }
 

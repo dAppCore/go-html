@@ -92,7 +92,7 @@ func TestSubsystem_schemaForType_Good(t *core.T) {
 		Ignored string `json:"-"`
 	}
 
-	schema := schemaForType(reflect.TypeOf(sample{}))
+	schema := schemaForType(reflect.TypeFor[sample]())
 
 	core.AssertEqual(t, map[string]any{
 		"type": "object",
@@ -118,8 +118,8 @@ func TestSubsystem_schemaForType_Ugly(t *core.T) {
 	// schemaForType
 	ax7Variant := "schemaForType:ugly"
 	core.AssertContains(t, ax7Variant, "ugly")
-	core.AssertEqual(t, map[string]any{"type": "string"}, schemaForType(reflect.TypeOf(make(chan int))))
-	observedType := core.Sprintf("%T", schemaForType(reflect.TypeOf(make(chan int))))
+	core.AssertEqual(t, map[string]any{"type": "string"}, schemaForType(reflect.TypeFor[chan int]()))
+	observedType := core.Sprintf("%T", schemaForType(reflect.TypeFor[chan int]()))
 	core.AssertNotEmpty(t, observedType)
 }
 

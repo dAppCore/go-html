@@ -3,6 +3,7 @@ package display
 import (
 	"context"
 	"reflect"
+	"slices"
 
 	core "dappco.re/go"
 	"dappco.re/go/render/display/webkit/pkg/deno"
@@ -235,12 +236,7 @@ func validateSidecarDir(value string) (string, resultFailure) {
 }
 
 func hasParentPathComponent(path string) bool {
-	for _, part := range core.Split(core.PathToSlash(path), "/") {
-		if part == ".." {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(core.Split(core.PathToSlash(path), "/"), "..")
 }
 
 func rejectSymlinkPathComponents(path string) resultFailure {

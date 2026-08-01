@@ -372,8 +372,8 @@ func zeroReturnValues(fnType reflect.Type) []reflect.Value {
 		return nil
 	}
 	out := make([]reflect.Value, 0, fnType.NumOut())
-	for i := 0; i < fnType.NumOut(); i++ {
-		out = append(out, reflect.Zero(fnType.Out(i)))
+	for out0 := range fnType.Outs() {
+		out = append(out, reflect.Zero(out0))
 	}
 	return out
 }

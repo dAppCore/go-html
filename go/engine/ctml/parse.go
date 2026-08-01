@@ -839,7 +839,7 @@ func isValidPath(s string) bool {
 	if s == "" {
 		return false
 	}
-	for _, step := range strings.Split(s, ".") {
+	for step := range strings.SplitSeq(s, ".") {
 		if !isIdent(step) {
 			return false
 		}

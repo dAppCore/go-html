@@ -15,8 +15,8 @@ import (
 	"time"
 
 	core "dappco.re/go"
-	"dappco.re/go/render/engine/codegen"
 	coreio "dappco.re/go/io"
+	"dappco.re/go/render/engine/codegen"
 )
 
 const defaultPollInterval = 250 * time.Millisecond

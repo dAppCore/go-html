@@ -10,9 +10,9 @@ import (
 	"testing"
 
 	core "dappco.re/go"
-	html "dappco.re/go/render/engine/html"
-	ctml "dappco.re/go/render/engine/ctml"
 	coreio "dappco.re/go/io"
+	ctml "dappco.re/go/render/engine/ctml"
+	html "dappco.re/go/render/engine/html"
 )
 
 // Run parses and runs every _test.ctml tape matching glob, each as its own
