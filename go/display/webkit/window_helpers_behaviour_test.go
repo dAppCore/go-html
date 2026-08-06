@@ -82,3 +82,19 @@ func TestWindowHelpersBehaviour_WindowExists_Bad(t *core.T) {
 	core.AssertFalse(t, WindowExists(c, "chat"))
 	core.AssertFalse(t, HideWindow(c, "chat"))
 }
+
+// A window service that answers the query but misses returns a TYPED nil
+// *WindowInfo inside the Result — which an interface nil-check passes.
+// WindowExists must unwrap the value, or every name "exists" and callers
+// take warm-window paths against windows that were never created.
+func TestWindowHelpersBehaviour_WindowExists_Ugly(t *core.T) {
+	c := core.New(core.WithServiceLock())
+	c.RegisterQuery(func(_ *core.Core, q core.Query) core.Result {
+		if _, ok := q.(window.QueryWindowByName); ok {
+			return core.Result{Value: (*window.WindowInfo)(nil), OK: true}
+		}
+		return core.Result{}
+	})
+
+	core.AssertFalse(t, WindowExists(c, "never-created"))
+}
