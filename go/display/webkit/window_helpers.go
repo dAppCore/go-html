@@ -185,5 +185,13 @@ func WindowExists(c *core.Core, name string) bool {
 		return false
 	}
 	r := c.QUERY(window.QueryWindowByName{Name: name})
-	return r.OK && r.Value != nil
+	if !r.OK {
+		return false
+	}
+	// The query answers a miss with a typed-nil *WindowInfo inside the
+	// Result, and a typed nil still passes an interface nil-check — so
+	// trusting r.Value != nil made every name exist, and callers took
+	// warm-window paths against windows that were never created.
+	info, ok := r.Value.(*window.WindowInfo)
+	return ok && info != nil
 }
