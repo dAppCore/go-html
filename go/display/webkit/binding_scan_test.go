@@ -4,6 +4,7 @@ package webkit
 
 import (
 	"reflect"
+	"strings"
 	"testing"
 	"testing/fstest"
 )
@@ -118,5 +119,91 @@ func TestScanCallByName_Drift(t *testing.T) {
 	}
 	if got := sites.Files[want[0]]; len(got) != 1 || got[0] != "app/probe.service.ts" {
 		t.Fatalf("Files for the stale call = %v, want [app/probe.service.ts]", got)
+	}
+}
+
+// TestScanCallByName_InterpolatedTemplate pins the trap the in-tree
+// Angular example walked straight into: factoring the package prefix
+// into a constant and calling Call.ByName(`${PKG}.Type.Method`) is the
+// natural way to write these, and the source text is NOT the binding
+// name. Emitting it would invent a name no service exposes and fail the
+// gate on a perfectly correct call, so it must be reported as
+// unverifiable instead.
+func TestScanCallByName_InterpolatedTemplate(t *testing.T) {
+	fsys := fstest.MapFS{
+		"app/wails.service.ts": &fstest.MapFile{Data: []byte(
+			"const PKG = 'pkg/runner';\n" +
+				"const echo = () => Call.ByName(`${PKG}.Service.Echo`);\n")},
+	}
+
+	sites, err := ScanCallByName(fsys)
+	if err != nil {
+		t.Fatalf("ScanCallByName: %v", err)
+	}
+	for _, name := range sites.Names {
+		if strings.Contains(name, "${") {
+			t.Fatalf("Names contains raw source text %q — that is not a binding name", name)
+		}
+	}
+	if len(sites.Names) != 0 {
+		t.Fatalf("Names = %v, want none — an interpolated call cannot be verified", sites.Names)
+	}
+	if want := []string{"app/wails.service.ts"}; !reflect.DeepEqual(sites.Dynamic, want) {
+		t.Fatalf("Dynamic = %v, want %v", sites.Dynamic, want)
+	}
+}
+
+// TestScanCallByName_CommentsAreNotCalls pins the trap the in-tree
+// example hit second: documenting a binding must not register a call to
+// it. Before comment stripping, the doc comment on the example's own
+// wails.service.ts made the drift gate fail on prose.
+func TestScanCallByName_CommentsAreNotCalls(t *testing.T) {
+	fsys := fstest.MapFS{
+		"app/documented.service.ts": &fstest.MapFile{Data: []byte(
+			"/**\n" +
+				" * Prefer Call.ByName('pkg.Ghost.FromBlockComment') over the old API.\n" +
+				" * The interpolated form Call.ByName(`${PKG}.T.M`) cannot be checked.\n" +
+				" */\n" +
+				"// Call.ByName('pkg.Ghost.FromLineComment') was removed in v2.\n" +
+				"export const real = () => Call.ByName('pkg.Runner.Start');\n")},
+	}
+
+	sites, err := ScanCallByName(fsys)
+	if err != nil {
+		t.Fatalf("ScanCallByName: %v", err)
+	}
+	if want := []string{"pkg.Runner.Start"}; !reflect.DeepEqual(sites.Names, want) {
+		t.Fatalf("Names = %v, want %v — only the real call counts", sites.Names, want)
+	}
+	if len(sites.Dynamic) != 0 {
+		t.Fatalf("Dynamic = %v, want none — an interpolated call in a COMMENT is not a blind spot", sites.Dynamic)
+	}
+}
+
+// TestStripComments_Good asserts a // sequence inside a string literal
+// survives, so a URL in a call argument is not mistaken for a comment
+// and silently truncated.
+func TestStripComments_Good(t *testing.T) {
+	source := `const url = "https://example.test/a"; // trailing note
+const tick = 'a//b';
+/* block */ const kept = 1;`
+
+	stripped := stripComments(source)
+
+	for _, keep := range []string{`"https://example.test/a"`, `'a//b'`, "const kept = 1;"} {
+		if !strings.Contains(stripped, keep) {
+			t.Errorf("stripped source lost %q:\n%s", keep, stripped)
+		}
+	}
+	for _, gone := range []string{"trailing note", "block"} {
+		if strings.Contains(stripped, gone) {
+			t.Errorf("stripped source still carries comment text %q:\n%s", gone, stripped)
+		}
+	}
+	if got, want := strings.Count(stripped, "\n"), strings.Count(source, "\n"); got != want {
+		t.Fatalf("newline count = %d, want %d — offsets must be preserved", got, want)
+	}
+	if len(stripped) != len(source) {
+		t.Fatalf("length = %d, want %d — stripping must preserve byte offsets", len(stripped), len(source))
 	}
 }

@@ -1,0 +1,15 @@
+/* SPDX-Licence-Identifier: EUPL-1.2 */
+
+:root {
+  color-scheme: light dark;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+body {
+  margin: 0;
+}
+
+button {
+  font: inherit;
+  padding: 0.35rem 0.7rem;
+}

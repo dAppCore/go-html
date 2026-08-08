@@ -110,11 +110,15 @@ func ScanCallByName(fsys fs.FS) (CallSites, error) {
 		if readErr != nil {
 			return core.E("webkit.ScanCallByName", "read "+name, readErr)
 		}
-		source := string(content)
+		source := stripComments(string(content))
 
 		for _, match := range callByNamePattern.FindAllStringSubmatch(source, -1) {
 			literal, ok := unquoteCallArgument(match)
 			if !ok || literal == "" {
+				// An interpolated template literal reaches here. It is a
+				// call whose name cannot be checked, not a call to
+				// ignore — record the file so the gate reports the gap.
+				dynamic[name] = true
 				continue
 			}
 			sites.Files[literal] = appendUnique(sites.Files[literal], name)
@@ -148,6 +152,13 @@ func ScanCallByName(fsys fs.FS) (CallSites, error) {
 // value. Single- and back-quoted forms are stripped directly; the
 // double-quoted form goes through strconv so JS escapes (".") match
 // what the runtime actually sends.
+//
+// A template literal carrying a substitution — Call.ByName(`${PKG}.T.M`),
+// the natural way to write these once a package prefix is factored into
+// a constant — is NOT a literal. Reporting the raw source text as a
+// binding name would invent a name no service exposes and fail the gate
+// on a call that is perfectly correct, so the second return is false and
+// the call is recorded as unverifiable instead.
 func unquoteCallArgument(match []string) (string, bool) {
 	switch {
 	case match[1] != "":
@@ -158,6 +169,9 @@ func unquoteCallArgument(match []string) (string, bool) {
 		}
 		return strings.Trim(match[2], `"`), true
 	case match[3] != "":
+		if strings.Contains(match[3], "${") {
+			return "", false
+		}
 		return strings.Trim(match[3], "`"), true
 	}
 	return "", false
@@ -172,4 +186,84 @@ func appendUnique(list []string, value string) []string {
 		}
 	}
 	return append(list, value)
+}
+
+// stripComments blanks out // and /* */ comments, preserving every byte
+// offset and every newline by substituting spaces.
+//
+// Without this, a doc comment that DOCUMENTS a binding name is read as a
+// call to it: prose like
+//
+//	/** Call.ByName('pkg.Service.Method') resolves the runner. */
+//
+// contributes a name no service need expose, failing the drift gate on
+// a comment — and the interpolated form in such a comment gets a whole
+// file reported as unverifiable. Commenting your bindings must not break
+// the check on your bindings.
+//
+// The scan is string-literal aware, so a `//` inside a quoted string
+// ("https://example.test") is not mistaken for a comment. Escapes are
+// honoured inside quotes; template literals are treated as plain quoted
+// spans, which is sufficient because a substitution can only make a call
+// unverifiable, never resolvable.
+func stripComments(source string) string {
+	const (
+		code = iota
+		lineComment
+		blockComment
+		quoted
+	)
+
+	out := []byte(source)
+	state := code
+	var quote byte
+	escaped := false
+
+	for i := 0; i < len(source); i++ {
+		char := source[i]
+		switch state {
+		case code:
+			switch {
+			case char == '/' && i+1 < len(source) && source[i+1] == '/':
+				state = lineComment
+				out[i], out[i+1] = ' ', ' '
+				i++
+			case char == '/' && i+1 < len(source) && source[i+1] == '*':
+				state = blockComment
+				out[i], out[i+1] = ' ', ' '
+				i++
+			case char == '\'' || char == '"' || char == '`':
+				state, quote, escaped = quoted, char, false
+			}
+
+		case lineComment:
+			if char == '\n' {
+				state = code
+				continue
+			}
+			out[i] = ' '
+
+		case blockComment:
+			if char == '*' && i+1 < len(source) && source[i+1] == '/' {
+				state = code
+				out[i], out[i+1] = ' ', ' '
+				i++
+				continue
+			}
+			if char != '\n' {
+				out[i] = ' '
+			}
+
+		case quoted:
+			switch {
+			case escaped:
+				escaped = false
+			case char == '\\':
+				escaped = true
+			case char == quote:
+				state = code
+			}
+		}
+	}
+	return string(out)
 }
