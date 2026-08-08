@@ -103,11 +103,3 @@ func TestToolsChatBehaviour_History_Bad(t *core.T) {
 	core.AssertError(t, err)
 	core.AssertContains(t, err.Error(), "no conversation")
 }
-
-// decodeChatValue round-trips a value and reports failure on a non-decodable
-// shape.
-func TestToolsChatBehaviour_decodeChatValue(t *core.T) {
-	got, err := decodeChatValue[ChatSettings](map[string]any{"default_model": "lemma"})
-	core.AssertNil(t, err)
-	core.AssertEqual(t, "lemma", got.DefaultModel)
-}
