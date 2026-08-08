@@ -724,3 +724,61 @@ func TestState_StateManager_ForceSync_Ugly(t *core.T) {
 	})
 	core.AssertNotNil(t, result.Value)
 }
+
+func TestStateManagerState_SaveAtomic_Good(t *core.T) {
+	// save — publishes via coreWriteFileAtomic
+	ax7Variant := "save:good"
+	core.AssertContains(t, ax7Variant, "good")
+	dir := t.TempDir()
+	sm := NewStateManagerWithDir(dir)
+	sm.states["main"] = WindowState{X: 1, Y: 2, Width: 640, Height: 480}
+	core.RequireNoError(t, sm.save())
+
+	content, err := coreReadFile(core.PathJoin(dir, "window_state.json"))
+	core.RequireNoError(t, err)
+	loaded := make(map[string]WindowState)
+	core.RequireTrue(t, core.JSONUnmarshal(content, &loaded).OK)
+	core.AssertEqual(t, 640, loaded["main"].Width)
+}
+
+func TestStateManagerState_SaveAtomic_Ugly_ConcurrentWritersNeverSplice(t *core.T) {
+	// save — two managers share one path, as lthn and core/ide share the
+	// Core config directory in production. Every read during the storm
+	// must parse: rename publishes complete documents only. The plain
+	// truncate-and-write this guards against could splice one writer's
+	// short document onto the tail of the other's longer one.
+	ax7Variant := "save:ugly"
+	core.AssertContains(t, ax7Variant, "ugly")
+	path := core.PathJoin(t.TempDir(), "window_state.json")
+	long := NewStateManagerWithPath(path)
+	short := NewStateManagerWithPath(path)
+	for i := 0; i < 24; i++ {
+		long.states[core.Concat("window-", core.Itoa(i))] = WindowState{X: i, Y: i, Width: 1600, Height: 900}
+	}
+	short.states["main"] = WindowState{Width: 640, Height: 480}
+
+	done := make(chan bool, 2)
+	writer := func(sm *StateManager) {
+		for i := 0; i < 50; i++ {
+			_ = sm.save()
+		}
+		done <- true
+	}
+	go writer(long)
+	go writer(short)
+
+	spliced := 0
+	for i := 0; i < 200; i++ {
+		content, err := coreReadFile(path)
+		if err != nil {
+			continue // the first save may not have landed yet
+		}
+		loaded := make(map[string]WindowState)
+		if !core.JSONUnmarshal(content, &loaded).OK {
+			spliced++
+		}
+	}
+	<-done
+	<-done
+	core.AssertEqual(t, 0, spliced)
+}

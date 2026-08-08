@@ -161,7 +161,7 @@ func (lm *LayoutManager) save() resultFailure {
 			return core.E("window.LayoutManager.save", "failed to create window layout directory", err)
 		}
 	}
-	if err := coreWriteFile(filePath, data, 0o644); err != nil {
+	if err := coreWriteFileAtomic(filePath, data, 0o644); err != nil {
 		core.Error(
 			"window layout save failed",
 			"file_path", filePath,
