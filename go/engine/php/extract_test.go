@@ -6,6 +6,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"testing/fstest"
 )
@@ -148,8 +149,14 @@ func (f *faultyFS) ReadFile(name string) ([]byte, error) {
 	return f.MapFS.ReadFile(name)
 }
 
-// tempDirEntries snapshots the names in the system temp directory that
-// Extract would create into, so a leak can be detected by difference.
+// tempDirEntries snapshots the directories Extract itself would create,
+// so a leak can be detected by difference.
+//
+// Only entries carrying Extract's own "go-php-laravel-" prefix are
+// counted. Snapshotting the whole temp directory would make these tests
+// fail whenever anything else on the machine created a temporary file
+// between the two calls — a flake that would land in CI looking like a
+// leak.
 func tempDirEntries(t *testing.T) map[string]bool {
 	t.Helper()
 	entries, err := os.ReadDir(os.TempDir())
@@ -158,7 +165,9 @@ func tempDirEntries(t *testing.T) map[string]bool {
 	}
 	names := make(map[string]bool, len(entries))
 	for _, entry := range entries {
-		names[entry.Name()] = true
+		if strings.HasPrefix(entry.Name(), "go-php-laravel-") {
+			names[entry.Name()] = true
+		}
 	}
 	return names
 }
