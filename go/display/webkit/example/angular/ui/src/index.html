@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>webkit + Angular</title>
+    <base href="/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!--
+      No <meta http-equiv="Content-Security-Policy"> here on purpose.
+      The policy is set by the HOST, via webkit.CSPMiddleware, so the
+      single source of truth is Go and the dev/production variants cannot
+      drift apart. A meta tag here would additionally be intersected with
+      the header, which is how a policy that looks correct in one place
+      still blocks the transport.
+    -->
+  </head>
+  <body>
+    <app-root></app-root>
+  </body>
+</html>

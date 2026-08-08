@@ -1,0 +1,8 @@
+# Build output — the host reads it from disk at run time; it is never committed.
+/dist/
+/out-tsc/
+/.angular/
+/node_modules/
+
+# Generated wails bindings, if `wails3 generate bindings` is ever run here.
+/src/bindings/

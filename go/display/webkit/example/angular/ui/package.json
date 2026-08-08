@@ -1,0 +1,30 @@
+{
+  "name": "webkit-angular-example",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Minimal Angular application hosted by go-render display/webkit",
+  "scripts": {
+    "ng": "ng",
+    "start": "ng serve --port 9245",
+    "build": "ng build",
+    "watch": "ng build --watch --configuration development"
+  },
+  "dependencies": {
+    "@angular/common": "~20.3.16",
+    "@angular/compiler": "~20.3.16",
+    "@angular/core": "~20.3.16",
+    "@angular/forms": "~20.3.16",
+    "@angular/platform-browser": "~20.3.16",
+    "@angular/router": "~20.3.16",
+    "@wailsio/runtime": "^3.0.0-beta.5",
+    "rxjs": "~7.8.0",
+    "tslib": "^2.3.0",
+    "zone.js": "~0.15.0"
+  },
+  "devDependencies": {
+    "@angular/build": "^20.3.9",
+    "@angular/cli": "^20.3.9",
+    "@angular/compiler-cli": "^20.3.0",
+    "typescript": "~5.9.2"
+  }
+}
