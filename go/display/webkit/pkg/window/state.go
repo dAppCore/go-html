@@ -160,7 +160,7 @@ func (sm *StateManager) save() resultFailure {
 			return core.E("window.StateManager.save", "failed to create window state directory", err)
 		}
 	}
-	if err := coreWriteFile(filePath, data, 0o644); err != nil {
+	if err := coreWriteFileAtomic(filePath, data, 0o644); err != nil {
 		core.Error(
 			"window state save failed",
 			"file_path", filePath,
