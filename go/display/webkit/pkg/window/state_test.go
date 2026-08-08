@@ -757,10 +757,15 @@ func TestStateManagerState_SaveAtomic_Ugly_ConcurrentWritersNeverSplice(t *core.
 	}
 	short.states["main"] = WindowState{Width: 640, Height: 480}
 
+	// The first save lands before the reader starts, so every read below
+	// observes a file that exists; the reader then runs until BOTH writers
+	// finish, so reads are guaranteed to overlap the write storm.
+	core.RequireNoError(t, long.save())
+	saveErrs := make(chan resultFailure, 100)
 	done := make(chan bool, 2)
 	writer := func(sm *StateManager) {
 		for i := 0; i < 50; i++ {
-			_ = sm.save()
+			saveErrs <- sm.save()
 		}
 		done <- true
 	}
@@ -768,17 +773,23 @@ func TestStateManagerState_SaveAtomic_Ugly_ConcurrentWritersNeverSplice(t *core.
 	go writer(short)
 
 	spliced := 0
-	for i := 0; i < 200; i++ {
-		content, err := coreReadFile(path)
-		if err != nil {
-			continue // the first save may not have landed yet
+	finished := 0
+	for finished < 2 {
+		select {
+		case <-done:
+			finished++
+		default:
 		}
+		content, err := coreReadFile(path)
+		core.RequireNoError(t, err)
 		loaded := make(map[string]WindowState)
 		if !core.JSONUnmarshal(content, &loaded).OK {
 			spliced++
 		}
 	}
-	<-done
-	<-done
+	close(saveErrs)
+	for err := range saveErrs {
+		core.RequireNoError(t, err)
+	}
 	core.AssertEqual(t, 0, spliced)
 }
