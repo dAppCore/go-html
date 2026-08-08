@@ -11,7 +11,7 @@ require (
 	dappco.re/go/cli v0.13.0
 	dappco.re/go/config v0.18.0
 	dappco.re/go/i18n v0.12.1
-	dappco.re/go/io v0.15.3
+	dappco.re/go/io v0.15.4
 	dappco.re/go/ts v0.2.2
 	dappco.re/go/webview v0.11.0
 	github.com/charmbracelet/colorprofile v0.4.3
