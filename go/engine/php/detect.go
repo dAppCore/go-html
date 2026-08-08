@@ -24,18 +24,17 @@ const (
 // IsLaravelProject checks if the given directory is a Laravel project.
 // It looks for the presence of artisan file and laravel in composer.json.
 func IsLaravelProject(dir string) bool {
-	m := getMedium()
 
 	// Check for artisan file
 	artisanPath := core.PathJoin(dir, "artisan")
-	if !m.Exists(artisanPath) {
+	if !probeExists(artisanPath) {
 		return false
 	}
 
 	// Check composer.json for laravel/framework
 	composerPath := core.PathJoin(dir, composerJSONFile)
-	data, err := m.Read(composerPath)
-	if err != nil {
+	data, ok := probeRead(composerPath)
+	if !ok {
 		return false
 	}
 
@@ -64,12 +63,11 @@ func IsLaravelProject(dir string) bool {
 // IsFrankenPHPProject checks if the project is configured for FrankenPHP.
 // It looks for laravel/octane with frankenphp driver.
 func IsFrankenPHPProject(dir string) bool {
-	m := getMedium()
 
 	// Check composer.json for laravel/octane
 	composerPath := core.PathJoin(dir, composerJSONFile)
-	data, err := m.Read(composerPath)
-	if err != nil {
+	data, ok := probeRead(composerPath)
+	if !ok {
 		return false
 	}
 
@@ -87,13 +85,13 @@ func IsFrankenPHPProject(dir string) bool {
 
 	// Check octane config for frankenphp
 	configPath := core.PathJoin(dir, "config", "octane.php")
-	if !m.Exists(configPath) {
+	if !probeExists(configPath) {
 		// If no config exists but octane is installed, assume frankenphp
 		return true
 	}
 
-	configData, err := m.Read(configPath)
-	if err != nil {
+	configData, ok := probeRead(configPath)
+	if !ok {
 		return true // Assume frankenphp if we can't read config
 	}
 
@@ -135,7 +133,6 @@ func DetectServices(dir string) []DetectedService {
 
 // hasVite checks if the project uses Vite.
 func hasVite(dir string) bool {
-	m := getMedium()
 	viteConfigs := []string{
 		"vite.config.js",
 		"vite.config.ts",
@@ -144,7 +141,7 @@ func hasVite(dir string) bool {
 	}
 
 	for _, config := range viteConfigs {
-		if m.Exists(core.PathJoin(dir, config)) {
+		if probeExists(core.PathJoin(dir, config)) {
 			return true
 		}
 	}
@@ -155,21 +152,20 @@ func hasVite(dir string) bool {
 // hasHorizon checks if Laravel Horizon is configured.
 func hasHorizon(dir string) bool {
 	horizonConfig := core.PathJoin(dir, "config", "horizon.php")
-	return getMedium().Exists(horizonConfig)
+	return probeExists(horizonConfig)
 }
 
 // hasReverb checks if Laravel Reverb is configured.
 func hasReverb(dir string) bool {
 	reverbConfig := core.PathJoin(dir, "config", "reverb.php")
-	return getMedium().Exists(reverbConfig)
+	return probeExists(reverbConfig)
 }
 
 // needsRedis checks if the project uses Redis based on .env configuration.
 func needsRedis(dir string) bool {
-	m := getMedium()
 	envPath := core.PathJoin(dir, ".env")
-	content, err := m.Read(envPath)
-	if err != nil {
+	content, ok := probeRead(envPath)
+	if !ok {
 		return false
 	}
 
@@ -206,7 +202,6 @@ func needsRedis(dir string) bool {
 // DetectPackageManager detects which package manager is used in the project.
 // Returns "npm", "pnpm", "yarn", or "bun".
 func DetectPackageManager(dir string) string {
-	m := getMedium()
 	// Check for lock files in order of preference
 	lockFiles := []struct {
 		file    string
@@ -219,7 +214,7 @@ func DetectPackageManager(dir string) string {
 	}
 
 	for _, lf := range lockFiles {
-		if m.Exists(core.PathJoin(dir, lf.file)) {
+		if probeExists(core.PathJoin(dir, lf.file)) {
 			return lf.manager
 		}
 	}
@@ -230,10 +225,9 @@ func DetectPackageManager(dir string) string {
 
 // GetLaravelAppName extracts the application name from Laravel's .env file.
 func GetLaravelAppName(dir string) string {
-	m := getMedium()
 	envPath := core.PathJoin(dir, ".env")
-	content, err := m.Read(envPath)
-	if err != nil {
+	content, ok := probeRead(envPath)
+	if !ok {
 		return ""
 	}
 
@@ -253,10 +247,9 @@ func GetLaravelAppName(dir string) string {
 
 // GetLaravelAppURL extracts the application URL from Laravel's .env file.
 func GetLaravelAppURL(dir string) string {
-	m := getMedium()
 	envPath := core.PathJoin(dir, ".env")
-	content, err := m.Read(envPath)
-	if err != nil {
+	content, ok := probeRead(envPath)
+	if !ok {
 		return ""
 	}
 
