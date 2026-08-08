@@ -717,8 +717,7 @@ func TestTaskExecJS_Good(t *core.T) {
 
 	pw, ok := svc.Manager().Get("test")
 	core.RequireTrue(t, ok)
-	mw := pw.(*mockWindow)
-	core.AssertContains(t, mw.execJSCalls, "document.title = 'Ready'")
+	core.AssertContains(t, pw.(*mockWindow).execJSCallsSnapshot(), "document.title = 'Ready'")
 }
 
 func TestTaskExecJS_Bad(t *core.T) {
@@ -756,9 +755,11 @@ func TestTaskEvalJS_Good(t *core.T) {
 		if !ok {
 			continue
 		}
-		mw := pw.(*mockWindow)
-		if len(mw.execJSCalls) > 0 {
-			reqID = extractEvalReqID(mw.execJSCalls[len(mw.execJSCalls)-1])
+		// Through the snapshot, not the field: taskEvalJS is running on the
+		// goroutine above and appending to that slice as this loop reads it.
+		calls := pw.(*mockWindow).execJSCallsSnapshot()
+		if len(calls) > 0 {
+			reqID = extractEvalReqID(calls[len(calls)-1])
 		}
 	}
 	core.RequireTrue(t, reqID != "")
